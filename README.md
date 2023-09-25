@@ -1,4 +1,5 @@
-# sharingiscaring
+# Sharing is Caring Repository
+## All public, all the time. 
 
 Public Repository for Various Coding Things
 
