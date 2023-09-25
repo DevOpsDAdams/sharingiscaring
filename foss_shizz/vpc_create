@@ -1,0 +1,21 @@
+#!/bin/bash
+
+export AWS_ACCESS_KEY_ID=$(ansible-vault view ../Network_Automation/group_vars/all/dev --vault-password-file ~/ans_sandbox/.resaws.vt | awk '/aws_access_key/ {print $2}')
+export AWS_SECRET_ACCESS_KEY=$(ansible-vault view ../Network_Automation/group_vars/all/dev --vault-password-file ~/ans_sandbox/.resaws.vt | awk '/aws_secret_key/ {print $2}')
+export AWS_DEFAULT_REGION=us-east-2
+
+echo $AWS_ACCESS_KEY_ID
+echo $AWS_SECRET_ACCESS_KEY
+
+echo "Creating VPC and Gatering VPC ID"
+VPCID=$(aws ec2 create-vpc --cidr-block 10.5.0.0/16 --instance-tenancy default --output text | awk '/vpc-/ {print $7}' | sed '/^\s*$/d')
+
+echo "$VPCID is the VPC ID we're working with"
+sleep 0.5
+echo "Building CIDR Associations with VPC"
+
+for x in 10.6.0.0/16 10.7.0.0/16
+do
+  echo "Adding $x to $VPCID"
+  aws ec2 associate-vpc-cidr-block --vpc-id $VPCID --cidr-block $x
+done

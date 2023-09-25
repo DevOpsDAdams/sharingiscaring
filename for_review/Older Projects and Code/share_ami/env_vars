@@ -1,0 +1,14 @@
+#!/bin/env python3
+import os
+
+QA='11111111'
+DEV='22222222'
+STAGING='33333333'
+PROD='44444444'
+POC='55555555'
+
+share_id=[QA, DEV, STAGING, PROD, POC]
+
+
+for sid in share_id:
+    os.system('ansible-playbook share_ami.yml -vvv --extra-vars "share_id=' + sid + '"')

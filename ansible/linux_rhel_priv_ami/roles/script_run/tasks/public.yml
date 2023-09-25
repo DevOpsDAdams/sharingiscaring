@@ -1,0 +1,197 @@
+ - sts_assume_role:
+    role_arn: "{{rolearn}}"
+    role_session_name: "{{rolename}}"
+   register: assumed_role
+
+ - set_fact:
+     new_ec2: "{{item}}"
+   with_lines: cat ./instance_ip_address1
+
+ - debug:
+     var: new_ec2
+
+ - add_host:
+     hostname: "{{new_ec2}}"
+     ansible_user: ec2-user
+     ansible_ssh_private_key_file: .ssh/<<keyname>>
+
+ - name: Copy Files To Host
+   copy:
+     remote_src: no
+     src: "{{item}}"
+     dest: /root
+   with_items:
+     - "../shared_unix_files/addteam.py"
+     - "../shared_unix_files/krb5.conf"
+     - "../shared_unix_files/system-auth-ac"
+     - "../shared_unix_files/firstrun.tar"
+     - "../shared_unix_files/keygen.tar"
+     - "../shared_unix_files/sudoers.tar"
+     - "../shared_unix_files/tomcat-remediation.tar"
+     - "../shared_unix_files/TomcatDeploy.tar.gz"
+     - "../shared_unix_files/websphere.tar"
+     - "../shared_unix_files/unixteam.tar"
+     - "../shared_unix_files/sshd_config"
+     - "../shared_unix_files/ssh_config"
+     - "../shared_unix_files/sssd.conf"
+     - "../shared_unix_files/sshtar.tar"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Install Required Packages
+   yum:
+     name: "{{item}}"
+     state: latest
+     disable_gpg_check: yes
+   loop:
+     - "python3"
+     - "krb5-workstation"
+     - "sssd"
+     - "realmd"
+     - "oddjob"
+     - "oddjob-mkhomedir"
+     - "adcli"
+     - "samba-common"
+     - "samba-common-tools"
+     - "openldap-clients"
+     - "policycoreutils-python"
+     - "krb5-libs"
+     - "authconfig"
+     - "nss"
+     - "nss-util"
+     - "nss-tools"
+     - "nss-sysinit"
+     - "sssd-krb5"
+     - "sssd-krb5-common"
+     - "gcc"
+     - "make"
+     - "pcre-devel"
+     - "openssl-devel"
+     - "openldap-devel"
+     - "rrdtool.x86_64"
+     - "https://terabithia.org/rpms/xymon/el8/x86_64/xymon-client-4.3.29-1.el8.x86_64.rpm"
+   become: true
+   ignore_errors: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Add itops to server
+   ansible.builtin.user:
+     name: itops
+     comment: "IT Operations for CE and DevOps"
+     uid: 666
+     group: admins
+     append: yes
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Run Basic Scripts
+   shell: "{{item}}"
+   args:
+     chdir: /root
+   loop:
+     - "python3 addteam.py"
+     - "mkdir /home/itops/.ssh"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Unpack Unix Team
+   unarchive:
+     src: /root/unixteam.tar
+     dest: /home
+     remote_src: yes
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Set Privs on Home Directories
+   shell: "{{item}}"
+   args:
+     chdir: /home
+   with_items:
+     - "for x in $(ls); do chown -R $x:$x $x; done"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Unpack itops ssh
+   unarchive:
+     src: /root/sshtar.tar
+     dest: /home/itops/.ssh
+     remote_src: yes
+     mode: 0400
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Run Basic Scripts
+   shell: "{{item}}"
+   args:
+     chdir: /root
+   loop:
+     - "chown -R itops: /home/itops"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Unpack Sudoers.d
+   unarchive:
+     src: /root/sudoers.tar
+     dest: /etc/sudoers.d
+     remote_src: yes
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Move Kerberos Control File
+   copy:
+     src: /root/krb5.conf
+     dest: /etc/krb5.conf
+     remote_src: yes
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Move SSH Control Files
+   copy:
+     src: "/root/{{item}}"
+     dest: /etc/ssh/{{item}}
+     remote_src: yes
+   loop:
+     - "ssh_config"
+     - "sshd_config"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Move PAM AC Files
+   copy:
+     src: "/root/{{item}}"
+     dest: /etc/pam.d/{{item}}
+     mode: 0644
+     remote_src: yes
+   loop:
+     - "system-auth-ac"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Add FHMC.LOCAL to Xymon-Client Configuration
+   ansible.builtin.replace:
+     path: /etc/sysconfig/xymon-client
+     regexp: '^(XYMONSERVERS=).*'
+     replace: 'XYMONSERVERS="sysmon.fhmc.local"'
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Restart Xymon Client
+   shell: "{{item}}"
+   args:
+     chdir: /home
+   with_items:
+     - "systemctl restart xymon-client"
+   become: true
+   delegate_to: "{{new_ec2}}"
+
+ - name: Restart Services
+   service:
+     name: "{{item}}"
+     state: restarted
+   loop:
+     - "sssd"
+     - "sshd"
+     - "httpd"
+   ignore_errors: true
+   become: true
+   delegate_to: "{{new_ec2}}"

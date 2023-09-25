@@ -1,0 +1,26 @@
+{
+    "pager_duty_integration_url": "https://events.pagerduty.com/integration/<<some_code>>/enqueue",
+    "slack_chatbot_support_info_url": "https://global.sns-api.chatbot.amazonaws.com",
+    "sg_name": "<<security_group_name>>",
+    "vpc_name": "<<vpc_name>>",
+    "vpc_ids": "<<vpc_id>>",
+    "out_res_name": "<<outbound_resolver_name>>",
+    "subnet_ids": "subnet-1, subnet-2",
+    "rule_map": [
+        {
+          "name": "rule1",
+          "domain_name": "mydomain.net",
+          "rule_type": "FORWARD",
+          "ip_list": ["172.0.0.1", "172.0.1.0"]
+        },
+        {
+          "name": "rule2",
+          "domain_name": "mydomain.com",
+          "rule_type": "FORWARD",
+          "ip_list": ["172.1.1.0", "172.1.2.0"]
+        }
+    ],
+    "tags": {
+        "Key": "Value"
+    }
+}

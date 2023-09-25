@@ -1,0 +1,16 @@
+- hosts: localhost
+  gather_facts: no
+  module_defaults:
+    group/aws:
+      region: us-east-2
+  tasks:
+    - cloudformation:
+        stack_name: '{{ item[0] }}'
+        template: '{{ item[1] }}'
+        tags:
+          Tool: 'Ansible {{ ansible_version.string }}'
+      with_items:
+        - [route53-somedomain-com, somedomain.com.yml]
+        - [route53-somedomainaswell-com, somedomainaswell.com.yml]
+        - [route53-ci-deploy-roles, deploy-role.yml]
+        - [route53-newdomain-com, newdomain.com.yml]

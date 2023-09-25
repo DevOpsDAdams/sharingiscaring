@@ -1,0 +1,21 @@
+#!/bin/python3
+
+import os
+import sys
+import subprocess
+
+x=0
+#sp_name=input("Azure SP Name: ")
+sp_name="Service_Principal_1"
+print(sp_name + " is your username")
+
+list = {"Resource_Group_1",
+"Some_Resource_Name"}
+
+for li in list:
+    while x == 0:
+        print('az ad sp create-for-rbac --name ' + sp_name + ' --role "Storage Account Contributor" --scopes /subscriptions/<<subscription_id>>/' + li)
+        x = x+1
+        if x != 0:
+            break
+    print('az role assignment create --assignee' + sp_name + ' --role "Storage Account Contributor" --scopes /subscriptions/<<subscription_id>>/' + li)

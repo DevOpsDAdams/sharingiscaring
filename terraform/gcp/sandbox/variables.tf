@@ -1,0 +1,74 @@
+#GCP Cloud SQL and Database Variables
+
+variable "database_name" {
+  type        = string
+  default     = "test-rep-db"
+  description = "Name of the Database. Can be made iterable."
+}
+
+variable "dbtier" {
+  type        = string
+  default     = "db-f1-micro"
+  description = "SQL DB Tier"
+}
+
+variable "database_version" {
+  type        = string
+  default     = "MYSQL_8_0"
+  description = "Desired database version."
+}
+
+variable "delete_protection" {
+  type        = bool
+  default     = false
+  description = "Determine deletion protection for the database. True is required for production environments."
+}
+
+variable "avail_type" {
+  type        = string
+  default     = "REGIONAL"
+  description = "Availability type. Choices are Regional or Zone."
+}
+
+variable "disk_size" {
+  type        = number
+  default     = 100
+  description = "Number. Size of the disk for the database instance."
+}
+
+variable "disk_type" {
+  type        = string
+  default     = "PD_SSD"
+  description = "Type of disk used for the database instance. Choices are PD_SSD or PD_HDD."
+}
+
+variable "backup_config_bool" {
+  type = map(any)
+  default = {
+    "enabled" = true
+    "bin_log" = true
+  }
+}
+
+variable "backup_config_int" {
+  type = map(any)
+  default = {
+    "transaction_retention_days" = 3
+    "backup_retention"           = 3
+  }
+}
+
+variable "maintenance_int" {
+  type = map(any)
+  default = {
+    "day"              = 6
+    "hour"             = 0
+    "backup_retention" = 3
+  }
+}
+
+variable "maintenance_update" {
+  type        = string
+  default     = "stable"
+  description = "Provides the update type for the maintenance window."
+}

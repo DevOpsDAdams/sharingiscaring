@@ -1,0 +1,83 @@
+- hosts: localhost
+  gather_facts: False
+  vars_files:
+    - "./group_vars/all/{{env}}"
+  tasks:
+    - name: "Read AMI ID for use with Autoscaling in {{ env | upper }}"
+      set_fact:
+        ami_id: "{{item}}"
+      with_lines: cat ./ami_id_output
+
+    - debug:
+        var: ami_id
+
+    - name: "Create Application Load Balancer Target Group within {{ env | upper }}"
+      elb_target_group:
+        name: "{{resname | upper}}-{{env | upper}}-TG"
+        protocol: http
+        port: 80
+        vpc_id: <<vpc_id>>
+        state: present
+        region: "{{region}}"
+        health_check_path: /
+        health_check_protocol: http
+        health_check_timeout: 5
+        successful_response_codes: 200
+
+    - name: "Create Application Launch Configuration within {{ env | upper }}"
+      ec2_lc:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        name: "{{resname | upper}}-{{env | upper}}-LC"
+        state: present
+        image_id: "{{ami_id}}"
+        instance_type: "c5.xlarge"
+        volumes:
+          - device_name: /dev/sda1
+            volume_size: 100
+            delete_on_termination: true
+        ebs_optimized: true
+        instance_monitoring: true
+        region: "{{region}}"
+        key_name: "auto_test"
+        security_groups:
+          - "sg-1"
+
+    - name: "Create Application Autoscaling Group within {{ env | upper }}"
+      ec2_asg:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        name: "{{resname | upper}}-{{env | upper}}-ASG"
+        launch_config_name: "{{resname | upper}}-{{env | upper}}-LC"
+        min_size: 1
+        max_size: 12
+        desired_capacity: 2
+        state: present
+        region: "{{region}}"
+        vpc_zone_identifier: ["subnet-1", "subnet-2"]
+        health_check_period: 60
+        health_check_type: ELB
+      register: asgoutput
+
+    - debug:
+        var: asgoutput.instances[{{item.0}}]
+      with_indexed_items:
+        - "{{asgoutput.instances}}"
+
+    - name: "Create Application Load Balancer within {{ env | upper }}"
+      elb_application_lb:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        name: "ansible-test-lb"
+        scheme: internet-facing
+        state: present
+        subnets: ["subnet-1", "subnet-2"]
+        security_groups:
+          - "sg-1"
+        region: "{{region}}"
+        listeners:
+          - Protocol: HTTP
+            Port: 80
+            DefaultActions:
+              - Type: forward
+                TargetGroupName: "{{resname | upper}}-{{env | upper}}-TG"

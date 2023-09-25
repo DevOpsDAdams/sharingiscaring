@@ -1,0 +1,37 @@
+iam_profile_name: "ec2-windows-standard-role"
+platform: "Windows"
+vpc_name: "<<vpc_name" #
+subnet_name_regex: "<<subnet_name>>"
+subnet_id_list:
+sg_name: "<<security_group_name>>"
+system_group: "<<some_name>>"
+tags:
+  app_manager: CloudEngineering
+  app_name: RPA
+  app_owner: BSG
+  backup: "{\"Snapshot\":{\"time\":{\"interval\":24},\"retention\":7,\"volumes\":[\"all\"]}}"
+  business_unit: Information Technology
+  cost_center: Corporate
+  cost_allocation: 00315
+  description: RPA Server
+  environment: PROD
+  instance_manager: Windows
+  name: some-name
+  patch_group:
+  ticket_number:
+  automation: Ansible
+volumes:
+  name: "/dev/sda1"
+  size: 200
+  type: "gp2"
+  encryption: "true"
+start_value: 2
+end_value: 4
+protection: "yes"
+iop: 3000
+term_delete: "yes"
+assign_pub_ip: "no"
+aws_region: "us-east-1"
+instance_type: "r5.2xlarge"
+wait: "no"
+mail_list: you@me.com, myname@example.com, me@you.com

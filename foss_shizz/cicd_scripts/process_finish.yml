@@ -1,0 +1,11 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Send Completion Email
+      mail:
+        host: smtp.example.local
+        port: 25
+        to: some_user@example.com
+        from: Ansible Mailer <ansible_mailer@example.com>
+        subject: Request <<request_id>> has Started
+        body: "Please logon to the servers to validate that they are up and running as required.\n\n\nPlease do not reply to this email message as it is not a monitored inbox."

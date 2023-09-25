@@ -1,0 +1,14 @@
+{
+    "name": "test-db1",
+    "region": "us-west1",
+    "databaseVersion": "MYSQL_8_0",
+    "onPremisesConfiguration": {
+      "hostPort": "192.168.1.2:3306",
+      "username": "SpankMe",
+      "password": "${rootpw}",
+      "dumpFilePath": "gs://google-cloud-bucket/source-database.sql.gz",
+      "caCertificate": "-----BEGIN CERTIFICATE-----PFFTYOUTHOUGHT=-----END CERTIFICATE-----",
+      "clientCertificate": "-----BEGIN CERTIFICATE-----YOINK=-----END CERTIFICATE-----",
+      "clientKey": "-----BEGIN RSA PRIVATE KEY-----YOUAREMYDAD!!!YOURMYDAD!!BOOGIEWOOGIEWOOGIE!!=-----END RSA PRIVATE KEY-----"
+    }
+}

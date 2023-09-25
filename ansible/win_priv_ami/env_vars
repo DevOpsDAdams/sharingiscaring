@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export QA='<<account_id>>'
+export DEV ='<<account_id>>'
+export STAGING='<<account_id>>'
+export PROD='<<account_id>>'
+export POC='<<account_id>>'
+
+export REGION='us-east-2'
+export ACCOUNT='<<account_id>>'
+export SG_ID='sg-1'
+export UsageVpcId='vpc-1'
+export Subnet_ID='subnet-1'

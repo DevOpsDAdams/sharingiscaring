@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export ip_address=$1
+export activation_region="us-east-2"
+if [[ -z "$ip_address" || -z "$activation_region" ]]; then
+  echo "Usage: get-activation-key ip_address activation_region"
+  return 1
+fi
+if redirect_url=$(curl -f -s -S -w '%{redirect_url}' "http://$ip_address/?activationRegion=$activation_region"); then
+  activation_key_param=$(echo "$redirect_url" | grep -oE 'activationKey=[A-Z0-9-]+')
+  echo "$activation_key_param" | cut -f2 -d=
+else
+  return 1
+fi
+

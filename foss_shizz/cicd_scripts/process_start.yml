@@ -1,0 +1,11 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Send Start Email
+      mail:
+        host: smtp.example.local
+        port: 25
+        to: some_user@example.com
+        from: Ansible Mailer <ansible_mailer@example.com>
+        subject: Request <<request_id>> has Started
+        body: "The request of servers has begun. Please do NOT access these servers.\n\n\nPlease do not reply to this email message as it is not a monitored inbox."

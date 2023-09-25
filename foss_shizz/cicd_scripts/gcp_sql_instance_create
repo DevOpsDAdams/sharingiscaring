@@ -1,0 +1,5 @@
+export sqlpw=$(gcloud secrets versions access latest --secret=sql_root_pw)
+
+gcloud sql instances create dadamstestdb --database-version=MYSQL_8_0 --cpu=4 \
+--memory=3.5GiB --zone=us-central1-a --root-password=$sqlpw --enable-bin-log \
+--authorized-networks=qlik1,[1.2.3.4/32]

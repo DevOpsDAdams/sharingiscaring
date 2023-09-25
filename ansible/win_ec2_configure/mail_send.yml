@@ -1,0 +1,13 @@
+- hosts: localhost
+  gather_facts: False
+  vars_files:
+    - ./group_vars/all/vars.yml
+  tasks:
+    - name: Send an email to test user indicating build completion
+      mail:
+        host: smtp.host.local
+        port: 25
+        to: "{{ mail_list }}"
+        from: Ansible Mailer <ansible@example.com>
+        subject: "Windows Automation for {{ tags.ticket_number }} is Complete."
+        body: "The following instance(s) are up and running. Please validate.  \n\n\n\n{{ lookup('file', './inventory') }} \n\n\nPlease do not reply to this email as this is an automated message from an unmonitored inbox."
