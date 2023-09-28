@@ -1,13 +1,12 @@
 # MarkLogic
-The MarkLogic project is a canonical layer for tracking data processing within OneAmerica.
+The MarkLogic project is a canonical layer for tracking data processing.
 
 # Environments
 The following environments are handled by this repository
-1.	Dev oa-rg-marklogic-development-001
-2.	Test oa-rg-marklogic-test-001
-3.	Production oa-rg-marklogic-production-001
-4.	DR oa-rg-marklogic-dr-001
-5.  Model (Future Deployment)
+1.	Dev
+2.	Test
+3.	Production
+4.	DR
 
 # Init and Plan
 When building out and deploying to a MarkLogic environment, the following steps must be used in order to Initialize the environment, perform a plan and perform an apply.
