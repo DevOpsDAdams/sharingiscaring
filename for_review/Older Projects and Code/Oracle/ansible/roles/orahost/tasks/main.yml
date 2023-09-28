@@ -1,0 +1,6 @@
+---
+- ansible.builtin.include: install_pkgs.yml
+- ansible.builtin.include: orahost_config.yml
+- ansible.builtin.include: create_swap_file.yml
+- ansible.builtin.include: create_user_groups.yml
+- ansible.builtin.include: az_create_fs_orapth.yml

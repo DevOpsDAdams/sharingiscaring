@@ -22,3 +22,4 @@ resource "google_cloudbuild_trigger" "dadams_trigger" {
             }
         }
     }
+}

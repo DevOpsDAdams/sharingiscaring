@@ -1,0 +1,55 @@
+---
+- name: PreConfig | Copy sysctl Config
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/98-oracle.conf
+    src: oracleDB_19c_sysctl.conf
+    mode: "0644"
+  register: sysctl_change
+
+- name: Restart sysctl Config
+  ansible.builtin.shell: |
+    sysctl -p /etc/sysctl.d/98-oracle.conf
+  register: sysctl_update
+  changed_when: sysctl_update.rc != 0
+  when: sysctl_change is changed
+
+- name: Copy Limit Config
+  ansible.builtin.copy:
+    dest: /etc/security/limits.d/01-oracleDB_19c_limits.conf
+    src: oracleDB_19c_limits.conf
+    mode: 0644
+
+- name: Disable SELinux
+  ansible.builtin.selinux:
+    state: disabled
+  when: disable_selinux
+  register: selinux_change
+
+- name: Disable SElinux in config file
+  ansible.builtin.lineinfile:
+    state: present
+    backup: true
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: SELINUX=disabled
+  when: disable_selinux
+
+- name: Disable Firewalld Service
+  ansible.builtin.service:
+    name: firewalld
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  register: ignore_errors_register
+  when: disable_firewalld
+
+- name: Reboot System for Selinux
+  when: selinux_change is changed
+  block:
+    - name: PreConfig | reboot host
+      ansible.builtin.reboot:
+        msg: "reboot by Ansible"
+        reboot_timeout: 600
+        pre_reboot_delay: 5
+        post_reboot_delay: 10
+        test_command: "uptime"

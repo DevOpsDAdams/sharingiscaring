@@ -1,0 +1,23 @@
+---
+- name: PreConfig | Install EPEL Repo
+  ansible.builtin.dnf:
+    name: "{{ epel_rpm }}"
+    state: installed
+  when: configure_epel_repo and ansible_os_family == 'RedHat'
+  tags:
+    - epelrepo
+
+- name: PreConfig | Install common packages RHEL
+  ansible.builtin.dnf:
+    name: "{{ common_packages }}"
+    state: "installed"
+  when: install_os_packages and ansible_os_family == 'RedHat'
+  tags:
+    - commonpackages
+
+- name: PreConfig | Start and enable NTP(chronyd)
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+  when: configure_ntp

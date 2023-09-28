@@ -1,0 +1,21 @@
+---
+- name: PreConfig | Add Oracle Groups
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    state: present
+    gid: "{{ item.gid }}"
+  with_items:
+    - {name: "{{ oracle_group }}", gid: 51000}
+    - {name: "{{ oper_group }}", gid: 51001}
+    - {name: "{{ dba_group }}", gid: 51002}
+
+- name: PreConfig | Add Oracle User
+  ansible.builtin.user:
+    name: "{{ oracle_user }}"
+    expires: -1
+    shell: /bin/bash
+    uid: 51000
+    group: "{{ oracle_group }}"
+    groups: ["{{ oper_group }}", "{{ dba_group }}"]
+    append: true
+    state: present

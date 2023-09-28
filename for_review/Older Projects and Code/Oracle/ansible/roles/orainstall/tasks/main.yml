@@ -1,0 +1,75 @@
+---
+- name: Install OracleDB | Add oraInst.loc
+  template: src=oraInst.loc.j2 dest=/etc/oraInst.loc owner={{ oracle_user }} group={{ oracle_group }} mode=644 backup=yes
+  tags:
+  - orainst
+
+- name: Echo the updated db_homes_installed var to the screen.
+  debug: var=db_homes_installed
+
+- name: Install OracleDB | Create common directories
+  file: dest={{ item.name }} mode={{ item.mode}} owner={{ item.owner }} group={{ item.group }} state=directory
+  with_items: "{{oracle_directories}}"
+  tags:
+    - directoriesdb
+
+- name: Install OracleDB | Create stage directory (version specific)
+  file: dest={{ oracle_stage }}/{{ db_version }} mode=775 owner={{ oracle_user }} group={{ oracle_group }} state=directory
+  with_items:
+    - "{{ db_homes_installed }}"
+  run_once: "{{ configure_cluster }}"
+  when: db_homes_installed is defined  and item.state|lower == 'present'
+  tags:
+    - directoriesdb
+
+- name: Install OracleDB | Create ORACLE_HOME directory
+  file: dest={{ oracle_home_path }} mode=775 owner={{ oracle_user }} group={{ oracle_group }} state=directory
+  with_items: "{{db_homes_installed}}"
+  when: db_homes_config[item.home] is defined and item.state|lower == 'present'
+  tags:
+    - directoriesdb
+
+# - include_tasks: "{{ www_download_bin }}.yml"
+#  when: not is_sw_source_local and oracle_sw_copy
+
+#- name: Install OracleDB | Transfer oracle installfiles to server (Local to Target)
+#  copy: src={{ oracle_sw_source_local }}/{{ item[0].filename }} dest={{ oracle_stage }} mode=775 remote_src=yes force=no 
+#  with_nested:
+#    - "{{oracle_sw_image_db}}"
+#    - "{{db_homes_installed}}"
+#  become_user: "{{ oracle_user }}"
+#  run_once: "{{ configure_cluster}}"
+#  when: item[0].version == db_homes_config[item[1].home]['version'] and item[1].state|lower == 'present'  and is_sw_source_local and oracle_sw_copy
+#  tags:
+#    - oradbsw
+
+
+- name: Install OracleDB | Transfer oracle installfiles to server (Web to Target)
+  ansible.builtin.get_url: url={{ oracle_sw_source_www }} dest={{ oracle_stage }} mode=775 force=no
+  with_nested:
+    - "{{oracle_sw_image_db}}"
+    - "{{db_homes_installed}}"
+  become_user: "{{ oracle_user }}"
+  run_once: "{{ configure_cluster}}"
+  when: item[0].version == db_homes_config[item[1].home]['version'] and item[1].state|lower == 'present'  and is_sw_source_local and oracle_sw_copy
+  tags:
+    - oradbsw
+
+- include_tasks: install-oracle-db.yml
+  with_items:
+    - "{{ db_homes_installed }}"
+  loop_control:
+    loop_var: dbh
+  when: db_homes_installed is defined and dbh.state|lower == 'present'
+  tags: oradbinstall,dbchopt
+
+- name: Install OracleDB | copy start/stop script for autostart
+  copy: 
+    dest: /usr/local/bin
+    src: manage_oracle_rdbms_procs.sh
+    mode: 0755
+  tags: autostartup_service
+
+- include_tasks: "{{ hostinitdaemon }}.yml"
+  when: autostartup_service
+  tags: autostartup_service

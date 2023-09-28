@@ -1,0 +1,10 @@
+---
+- name: Setup Ansible User
+  hosts: '{{ host }}'
+  remote_user: oavmadmin
+  become: true
+  become_user: root
+
+  roles:
+  - orahost
+  - orainstall

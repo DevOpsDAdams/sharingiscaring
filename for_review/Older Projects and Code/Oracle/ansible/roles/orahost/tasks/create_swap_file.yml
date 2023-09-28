@@ -1,0 +1,45 @@
+---
+
+- name: Test if swapfile exist
+  ansible.builtin.shell: |
+    test -f "{{ swap_file }}"
+  register: swap_exists
+  changed_when: swap_exists.rc != 0
+  failed_when: false
+
+- name: Format disks if disks are not created
+  when: swap_exists.rc != 0
+  block:
+  - name: PreConfig | Create swap file
+    ansible.builtin.shell: |
+      dd if=/dev/zero of="{{ swap_file }}" bs=1G count="{{ swap_size_gb }}"
+    register: swapfs_create
+    changed_when: swapfs_create.rc != 0
+
+  - name: PreConfig | Change permission of swap file
+    ansible.builtin.file:
+      path: "{{ swap_file }}"
+      mode: "600"
+      state: file
+
+  - name: PreConfig | make swap
+    ansible.builtin.command: mkswap "{{ swap_file }}"
+    register: swap_create
+    changed_when: swap_create.rc != 0
+
+  - name: PreConfig | start swap
+    ansible.builtin.command: swapon "{{ swap_file }}"
+    register: swap_on
+    changed_when: swap_on.rc != 0
+
+  - name: PreConfig | Add to fstab
+    ansible.builtin.lineinfile:
+      dest: /etc/fstab
+      regexp: "swapfile"
+      line: '"{{ swap_file }}" swap swap sw 0 0'
+      state: present
+
+  - name: PreConfig | show swap
+    ansible.builtin.command: swapon -s
+    register: start_swap
+    changed_when: start_swap.rc != 0

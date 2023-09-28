@@ -1,0 +1,191 @@
+---
+configure_epel_repo: false
+repo_dir: /etc/yum.repos.d
+install_os_packages: true
+configure_ntp: true
+disable_selinux: true
+disable_firewalld: true
+swap_size_gb: 32
+swap_file: /swapfile
+
+oracle_user: oracle
+oracle_group: oinstall
+oper_group: oper
+dba_group: dba
+
+az_ora_disks_dev:
+    - { disk_name: /dev/disk/azure/scsi1/lun0-part1, mount_disk: /dev/sdb1, mount_point: /u03/app/oracle/WEBDMTST }
+    - { disk_name: /dev/disk/azure/scsi1/lun1-part1, mount_disk: /dev/sdc1, mount_point: /u02/app/oracle/RS_Test }
+    - { disk_name: /dev/disk/azure/scsi1/lun2-part1, mount_disk: /dev/sdd1, mount_point: /u03/app/oracle/EFTX_DEV }
+    - { disk_name: /dev/disk/azure/scsi1/lun3-part1, mount_disk: /dev/sde1, mount_point: /u03/app/oracle/RS_Test }
+    - { disk_name: /dev/disk/azure/scsi1/lun4-part1, mount_disk: /dev/sdf1, mount_point: /u02/app/oracle/EFTX_DEV }
+    - { disk_name: /dev/disk/azure/scsi1/lun5-part1, mount_disk: /dev/sdg1, mount_point: /u02/app/oracle/WEBDMTST }
+    - { disk_name: /dev/disk/azure/scsi1/lun6-part1, mount_disk: /dev/sdh1, mount_point: /u03/app/oracle/EFTX_Test }
+    - { disk_name: /dev/disk/azure/scsi1/lun7-part1, mount_disk: /dev/sdi1, mount_point: /u02/app/oracle/EFTX_Test }
+
+
+# Oracle Variables
+oracle_db_home: db1
+oracle_edition: SE2
+base_version: 19300-base
+default_dbpass: Oracle123
+oracle_base: /u01/app/oracle
+oracle_sw_source_www: "https://testastragecopy.blob.core.windows.net/testcopy/LINUX.X64_193000_db_home.zip?sp=r&st=2022-10-18T13:39:01Z&se=2025-10-18T21:39:01Z&spr=https&sv=2021-06-08&sr=b&sig=%2B7YqfYOO4sErXV3gMCxGAsX0IyV5RJbBq%2Fb1h%2BY05OE%3D"      #http://www/orasw     # address to all software if using the get_url module when putting software on the host(s)
+oracle_sw_source_local: /mnt  # Path to all software if using the copy module when putting software on the host(s)
+is_sw_source_local: true
+oracle_sw_copy: true
+oracle_sw_unpack: true
+oracle_db_responsefile: "{{ oracle_db_home }}_{{ ansible_hostname }}.rsp"
+oracle_stage: /u01/stage
+oracle_stage_remote: "/path/to/file on remote server"
+oracle_stage_install: "{% if not oracle_sw_copy and not oracle_sw_unpack %}{{ oracle_stage_remote }}{% else %}{{ oracle_stage }}{% endif %}"
+oracle_rsp_stage: "{{ oracle_stage }}/rsp"
+oracle_inventory_loc: /u01/app/oraInventory
+oracle_sw_extract_path: "{{ oracle_home_path }}"
+
+oracle_profile_name: ".profile_{{ oracle_db_home }}"
+autostartup_service: false # automatic startup/stop databases service
+configure_cluster: false
+
+#Auto Created Variables
+db_homes_config:
+  19300-base:
+    home: "{{ oracle_db_home }}"
+    version: 19.3.0.0
+    edition: "{{ oracle_edition }}"
+  18300-base:
+    home: "{{ oracle_db_home }}"
+    version: 18.3.0.0
+    edition: "{{ oracle_edition }}"
+
+oracle_version: "{{db_homes_config[base_version]['version']}}"
+astate: "{% if oracle_version == '19.3.0.0' %}present{% else %}absent{% endif %}"
+bstate: "{% if oracle_version == '18.3.0.0' %}present{% else %}absent{% endif %}"
+
+db_homes_installed:
+     - home: 19300-base
+       apply_patches: False
+       state: "{{ astate }}"
+     - home: 18300-base
+       apply_patches: False
+       state: "{{ bstate }}"
+
+oracle_home_path: "{{oracle_base}}/{{db_homes_config[base_version]['version']}}/{{db_homes_config[base_version]['home']}}"
+db_version: "{{db_homes_config[base_version]['version']}}"
+oracle_user_home: "/home/{{ oracle_user }}"
+oracle_hostname: "{{ ansible_fqdn }}"
+
+hostinitdaemon: "{% if ansible_os_family == 'RedHat' and ansible_distribution_major_version | int >= 7   %}systemd
+                   {%- elif ansible_os_family == 'Suse'   and ansible_distribution_major_version | int >= 12 %}systemd
+                   {%- else %}{% if ansible_service_mgr is defined %}{{ ansible_service_mgr }}{% else %}init{% endif %}{% endif %}"
+
+oracle_directories:
+          - {name: "{{ oracle_stage }}", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_rsp_stage }}", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/cfgtoollogs", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/admin", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/audit", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/cfgtoollogs/dbca", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/cfgtoollogs/sqlpatch", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_base }}/cfgtoollogs/netca", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "{{ oracle_user_home }}/.Scripts", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "/u02", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+          - {name: "/u03", owner: "{{ oracle_user }}", group: "{{ oracle_group }}", mode: 775 }
+
+oracle_sw_image_db:
+       - { filename: LINUX.X64_193000_db_home.zip, version: 19.3.0.0, creates: 'install/.img.bin' }
+       - { filename: LINUX.X64_180000_db_home.zip, version: 18.3.0.0, creates: 'install/.img.bin' }
+
+
+common_packages: "{% if ansible_distribution_major_version|int==7%}{{ common_packages_el7 }}
+                    {%elif ansible_distribution_major_version|int==8 %}{{ common_packages_el8 }}{% else %}None{% endif %}"
+common_packages_el7:
+  - screen
+  - facter
+  - procps
+  - module-init-tools
+  - ethtool
+  - bc
+  - nc
+  - bind-utils
+  - nfs-utils
+  - make
+  - sysstat
+  - unzip
+  - openssh-clients
+  - compat-libcap1
+  - collectl
+  - rlwrap
+  - tigervnc-server
+  - ntp
+  - expect
+  - git
+  - lvm2
+  - xfsprogs
+  - btrfs-progs
+  - python-devel
+  - python-pip
+  - libselinux-python
+  - autofs
+  - parted
+  - mlocate
+  - ntp
+  - ksh
+  # - mksh
+  - lvm2
+  - xfsprogs
+  - btrfs-progs
+  - procps
+  - psmisc
+
+common_packages_el8:
+  - procps
+  - module-init-tools
+  - ethtool
+  - lsof
+  - bc
+  - binutils
+  - elfutils-libelf
+  - elfutils-libelf-devel
+  - fontconfig-devel
+  - glibc
+  - glibc-devel
+  - ksh
+  - libaio
+  - libaio-devel
+  - libXrender
+  - libX11
+  - libXau
+  - libXi
+  - libXtst
+  - libgcc
+  - libnsl
+  - librdmacm
+  - libstdc++
+  - libstdc++-devel
+  - libxcb
+  - libibverbs
+  - make
+  - smartmontools
+  - sysstat
+  - nc
+  - bind-utils
+  - nfs-utils
+  - unzip
+  - openssh-clients
+  - tigervnc-server
+  - expect
+  - git
+  - lvm2
+  - xfsprogs
+  - autofs
+  - parted
+  - mlocate
+  - ksh
+  - lvm2
+  - xfsprogs
+  - psmisc
+  - python3
+  - python3-pip
+...

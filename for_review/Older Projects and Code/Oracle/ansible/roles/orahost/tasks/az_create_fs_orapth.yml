@@ -1,0 +1,73 @@
+---
+- name: Find all Luns
+  ansible.builtin.find:
+    paths: /dev/disk/azure/scsi1/
+    file_type: link
+    recurse: false
+    patterns: "lun?"
+  register: files_matched
+
+- name: Find if disks are created
+  ansible.builtin.find:
+    paths: /dev/disk/azure/scsi1/
+    file_type: link
+    recurse: false
+    patterns: "lun?-part1"
+  register: disks_matched
+
+- name: Format disks if disks are not created
+  when: disks_matched.files == []
+
+  block:
+    - name: Partition Disk to Max
+      ansible.builtin.command: "parted {{ item.path }} --script mklabel gpt mkpart xfspart xfs 0% 100%"
+      register: parted_out
+      loop: "{{ files_matched.files }}"
+      changed_when: parted_out.rc != 0
+
+    - name: Inform OS of partition table changes
+      ansible.builtin.command: partprobe
+      register: partprob_out
+      changed_when: partprob_out.rc != 0
+
+    - name: Format data disks
+      ansible.builtin.shell: |
+        mkfs.xfs -f $(readlink -f "{{ item.disk_name }}")
+      register: format_disk
+      loop: "{{ az_ora_disks_dev }}"
+      changed_when: format_disk.rc != 0
+
+#- name: Find UUID of data disks
+#  ansible.builtin.shell: |
+#    blkid -s UUID -o value $(readlink -f "{{ item.disk_name }}")
+#  register: uuid_out
+#  loop: "{{ az_ora_disks_dev }}"
+#  changed_when: uuid_out.rc != 0
+
+#- name: Mount disk drive in fstab
+#  ansible.builtin.mount:
+#    path: "{{ item.mount_point }}"
+#    src: "{{ item.mount_disk }}"
+#    fstype: xfs
+#    opts: defaults
+#    dump: 0
+#    passno: 0
+#    state: mounted
+#  loop: "{{ az_ora_disks_dev }}"
+
+- name: Check disk Status
+  ansible.builtin.shell: |
+    set -o pipefail
+    df -h | grep /dev/sd
+  register: df2_status
+  changed_when: df2_status.rc != 0
+
+- name: Show mounted FS
+  ansible.builtin.debug:
+    msg: "{{ df2_status.stdout_lines }}"
+
+#- name: change ownership of FS
+#  file: dest={{ item }} mode=775 owner={{ oracle_user }} group={{ oracle_group }} recurse=yes state=directory
+#  loop:
+#    - /u02
+#    - /u03
