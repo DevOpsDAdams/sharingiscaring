@@ -1,0 +1,70 @@
+- hosts: targethost
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Update Apt
+      apt:
+        update_cache: yes
+
+    - name: Install Python PIP3 and PWGen
+      apt:
+        name: python3-setuptools pwgen
+        state: present
+
+    - name: Install Ansible via PIP
+      ansible.builtin.pip:
+        name: ansible
+
+    - name: Verify Ansible is Installed
+      command: ansible --version
+      register: ansible_version
+
+    - debug:
+        var: ansible_version.stdout
+
+    - name: Install AWS CLI
+      command:
+          - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          - unzip awscliv2.zip
+          - sudo ./aws/install
+          - aws --version
+      register: aws_cli
+
+    - debug:
+        var: aws_cli.stdout
+
+    - name: Download Azure CLI Setup Script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/DevOpsDAdams/sharingiscaring/main/foss_shizz/cicd_scripts/azure_cli_setup.sh
+        dest: /tmp/azure_cli_setup.sh
+        mode: '0755'
+
+    - name: Install Azure CLI
+      command: /tmp/azure_cli_setup.sh
+
+    - name: Verify Azure CLI is Installed
+      command: az --version
+      register: az_version
+
+    - debug:
+        var: az_version.stdout
+
+    - name: Install Homebrew
+      ansible.builtin.shell: NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    - msg: "Homebrew Installed"
+
+    - name: Install Ansible Galaxy Collection
+      ansible.builtin.shell: ansible-galaxy collection install community.general
+
+    - name: Install Terraform Via HomeBrew
+      community.general.homebrew:
+        name: terraform
+        state: present
+
+    - name: Verify Terraform is Installed
+      command: terraform --version
+      register: terraform_version
+
+    - debug:
+        var: terraform_version.stdout
