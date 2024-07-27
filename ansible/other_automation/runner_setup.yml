@@ -68,3 +68,23 @@
 
     - debug:
         var: terraform_version.stdout
+
+    - name: Install Google Cloud SDK
+      ansible.builtin.shell: curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-356.0.0-linux-x86_64.tar.gz && tar -xvf google-cloud-sdk-356.0.0-linux-x86_64.tar.gz && ./google-cloud-sdk/install.sh
+
+    - name: Verify Google Cloud SDK is Installed
+      command: gcloud --version
+      register: gcloud_version
+
+    - debug:
+        var: gcloud_version.stdout
+
+    - name: Install GitLab Runner
+      ansible.builtin.shell: curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb" && sudo dpkg -i gitlab-runner_amd64.deb
+
+    - name: Verify GitLab Runner is Installed
+      command: gitlab-runner --version
+      register: gitlab_runner_version
+
+    - debug:
+        var: gitlab_runner_version.stdout
