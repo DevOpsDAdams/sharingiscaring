@@ -1,4 +1,4 @@
-module "lb-l4" {
+module "global_lb" {
   source              = "../modules/load-balancer"
   location            = var.json.common_info.location
   resource_group_name = azurerm_resource_group.resource_group.name

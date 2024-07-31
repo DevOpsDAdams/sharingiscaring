@@ -1,8 +1,9 @@
-output "storage_account_ids" {
-  description = "List of Created Storage Account IDs"
-  value = azurerm_storage_account.storage_account.*.id
+output "vnet_id" {
+  description = "The ID of the virtual network."
+  value       = azurerm_virtual_network.vnet.id
 }
 
-output "primary_file_endpoint" {
-  value = azurerm_storage_account.storage_account.*.primary_file_endpoint[0]
+output "vnet_guid" {
+  description = "The GUID of the virtual network."
+  value       = azurerm_virtual_network.vnet.guid
 }

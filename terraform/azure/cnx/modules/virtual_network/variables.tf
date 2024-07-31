@@ -1,83 +1,40 @@
-variable "storage_account_name" {
-  description = "The name of the Storage Account"
-  default     = ""
+variable "name" {
+  description = "The name of the virtual network."
+  type        = string
 }
 
 variable "resource_group_name" {
-  description = "The name of the Resource Group for the Subnet."
-  default     = ""
+  description = "The name of the resource group in which to create the virtual network."
+  type        = string
 }
 
 variable "location" {
-  description = "The location of the Storage Account in Azure."
-  default     = ""
+  description = "The location/region where the virtual network is created."
+  type        = string
 }
 
-variable "sa_kind" {
-  description = "The kind for the Storage Account."
-  default     = ""
+variable "address_space" {
+  description = "The address space that is used by the virtual network."
+  type        = list(string)
 }
 
-variable "sa_tier" {
-  description = "The tier for the Storage Account."
-  default     = ""
+variable "ddos_protection_plan" {
+  description = "A list of DDoS protection plan IDs to associate with the virtual network."
+  type        = map(object)
+  default     = {
+    "id" = "<<ID>>"
+    "enable" = true
+  }
 }
-
-variable "replication_type" {
-  description = "The replication type for the Storage Account."
-  default     = ""
+variable "encryption" {
+  description = "A list of encryption service names to enable for the virtual network."
+  type        = map(object)
+  default     = {
+    "enforcement" = "DropUnencrypted"
+  }
 }
 
 variable "tags" {
-}
-
-variable "subnet_ids" {
-  description = "A List of Subnet IDs to use with the Storage Account Network Rules"
-  default     = [""]
-}
-
-variable "diag_name" {
-  description = "The name of the Diagnostic Setting."
-  default     = ""
-}
-
-variable "diag_sa" {
-  description = "The name of the Diagnostic Setting Storage Account."
-  default     = ""
-}
-
-variable "subscription_id" {
-  description = "The subscription id for the null resource script"
-}
-
-variable "key_vault_id" {
-  description = "The ID of the KeyVault to use for CMK Keys"
-}
-
-variable "key_name" {
-  description = "The name of the KeyVault Key to use for CMK Keys"
-}
-
-variable "tenant_id" {
-  description = "The current config Tenant ID"
-}
-
-variable "key_permissions" {
-  description = "Key Permissions for the Keyvault"
-}
-
-variable "secret_permissions" {
-  description = "Secret Permissions for the Keyvault"
-}
-
-variable "storage_permissions" {
-  description = "Storage Permissions for the Keyvault"
-}
-
-variable "ip_rules" {
-  description = "Initial IP Addresse to Bypass the Network Restrictions."
-}
-
-variable "ip_rules2" {
-  description = "Additional IP Addresse(s) to Bypass the Network Restrictions."
+  description = "A mapping of tags to assign to the resource."
+  type        = map(string)
 }

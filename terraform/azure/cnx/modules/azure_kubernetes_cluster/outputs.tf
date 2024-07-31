@@ -1,8 +1,10 @@
-output "storage_account_ids" {
-  description = "List of Created Storage Account IDs"
-  value = azurerm_storage_account.storage_account.*.id
+output "client_certificate" {
+  value     = azurerm_kubernetes_cluster.k8s_cluster.kube_config[0].client_certificate
+  sensitive = true
 }
 
-output "primary_file_endpoint" {
-  value = azurerm_storage_account.storage_account.*.primary_file_endpoint[0]
+output "kube_config" {
+  value = azurerm_kubernetes_cluster.k8s_cluster.kube_config_raw
+
+  sensitive = true
 }

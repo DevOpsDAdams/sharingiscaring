@@ -1,83 +1,49 @@
-variable "storage_account_name" {
-  description = "The name of the Storage Account"
-  default     = ""
-}
-
 variable "resource_group_name" {
-  description = "The name of the Resource Group for the Subnet."
-  default     = ""
+  description = "The name of the resource group in which to create the AKS cluster."
+  type        = string
 }
 
 variable "location" {
-  description = "The location of the Storage Account in Azure."
-  default     = ""
+  description = "The location of the resource group in which to create the AKS cluster."
+  type        = string
 }
 
-variable "sa_kind" {
-  description = "The kind for the Storage Account."
-  default     = ""
+variable "cluster_name" {
+  description = "The name of the AKS cluster."
+  type        = string
 }
 
-variable "sa_tier" {
-  description = "The tier for the Storage Account."
-  default     = ""
+variable "kubernetes_version" {
+  description = "The version of Kubernetes to use for the AKS cluster."
+  type        = string
 }
 
-variable "replication_type" {
-  description = "The replication type for the Storage Account."
-  default     = ""
+variable "dns_prefix" {
+  description = "The DNS prefix specified when creating the AKS cluster."
+  type        = string
+}
+
+variable "default_node_pool_name" {
+  description = "The name of the default node pool."
+  type        = string
+}
+
+variable "default_node_pool_count" {
+  description = "The number of nodes in the default node pool."
+  type        = number
+}
+
+variable "default_node_pool_vm_size" {
+  description = "The VM size of the default node pool."
+  type        = string
+}
+
+variable "identity_type" {
+  description = "The type of identity to use for the AKS cluster."
+  type        = string
 }
 
 variable "tags" {
-}
-
-variable "subnet_ids" {
-  description = "A List of Subnet IDs to use with the Storage Account Network Rules"
-  default     = [""]
-}
-
-variable "diag_name" {
-  description = "The name of the Diagnostic Setting."
-  default     = ""
-}
-
-variable "diag_sa" {
-  description = "The name of the Diagnostic Setting Storage Account."
-  default     = ""
-}
-
-variable "subscription_id" {
-  description = "The subscription id for the null resource script"
-}
-
-variable "key_vault_id" {
-  description = "The ID of the KeyVault to use for CMK Keys"
-}
-
-variable "key_name" {
-  description = "The name of the KeyVault Key to use for CMK Keys"
-}
-
-variable "tenant_id" {
-  description = "The current config Tenant ID"
-}
-
-variable "key_permissions" {
-  description = "Key Permissions for the Keyvault"
-}
-
-variable "secret_permissions" {
-  description = "Secret Permissions for the Keyvault"
-}
-
-variable "storage_permissions" {
-  description = "Storage Permissions for the Keyvault"
-}
-
-variable "ip_rules" {
-  description = "Initial IP Addresse to Bypass the Network Restrictions."
-}
-
-variable "ip_rules2" {
-  description = "Additional IP Addresse(s) to Bypass the Network Restrictions."
+  description = "A mapping of tags to assign to the resource."
+  type        = map(string)
 }

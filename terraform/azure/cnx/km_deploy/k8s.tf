@@ -1,0 +1,39 @@
+module "kubernetes_cluster" {
+    source = "../../modules/azure_kubernetes_cluster"
+    for_each = var.json.k8s_clusters
+    name = each.value.name
+    resource_group_name = var.json.resource_groups.name
+    location = var.json.common_info.location
+    dns_prefix = each.value.dns_prefix
+    kubernetes_version = each.value.kubernetes_version
+    role_based_access_control_enabled = each.value.role_based_access_control_enabled
+    network_profile_network_plugin = each.value.network_profile_network_plugin
+    network_profile_network_policy = each.value.network_profile_network_policy
+    network_profile_service_cidr = each.value.network_profile_service_cidr
+    network_profile_dns_service_ip = each.value.network_profile_dns_service_ip
+    network_profile_docker_bridge_cidr = each.value.network_profile_docker_bridge_cidr
+    network_profile_outbound_ip_prefixes = each.value.network_profile_outbound_ip_prefixes
+    default_node_pool_name = each.value.default_node_pool_name
+    default_node_pool_node_count = each.value.default_node_pool_node_count
+    default_node_pool_vm_size = each.value.default_node_pool_vm_size
+    default_node_pool_os_disk_size_gb = each.value.default_node_pool_os_disk_size_gb
+    default_node_pool_vnet_subnet_id = each.value.default_node_pool_vnet_subnet_id
+    default_node_pool_availability_zones = each.value.default_node_pool_availability_zones
+    default_node_pool_enable_auto_scaling = each.value.default_node_pool_enable_auto_scaling
+    default_node_pool_min_count = each.value.default_node_pool_min_count
+    default_node_pool_max_count = each.value.default_node_pool_max_count
+    default_node_pool_max_pods = each.value.default_node_pool_max_pods
+    default_node_pool_node_labels = each.value.default_node_pool_node_labels
+    default_node_pool_tags = each.value.default_node_pool_tags
+    identity_type = each.value.identity_type
+    identity_user_assigned_identity_id = each.value.identity_user_assigned_identity_id
+    identity_user_assigned_identity_client_id = each.value.identity_user_assigned_identity_client_id
+    identity_user_assigned_identity_resource_id = each.value.identity_user_assigned_identity_resource_id
+    identity_system_assigned_identity_id = each.value.identity_system_assigned_identity_id
+    identity_system_assigned_identity_client_id = each.value.identity_system_assigned_identity_client_id
+    identity_system_assigned_identity_resource_id = each.value.identity_system_assigned_identity_resource_id
+    tags = var.json.tags
+    depends_on = [
+        module.resource_group
+    ]
+}
