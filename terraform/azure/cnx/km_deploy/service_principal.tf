@@ -1,6 +1,6 @@
 module "service_principal" {
-  source                                                            = "../modules/service_principal/"
-  for_each                                                          = var.json.service_principal_info
+  source   = "../modules/service_principal/"
+  for_each = var.json.service_principal_info
 
   display_name                 = each.value.display_name
   alternative_names            = each.value.alternative_names
