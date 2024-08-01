@@ -31,7 +31,7 @@ variable "key_options" {
 variable "rotation_policy" {
   description = "The rotation policy of the key."
   type        = map(string)
-  }
+}
 
 variable "expire_after" {
   description = "The expiration date of the key."

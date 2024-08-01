@@ -15,12 +15,12 @@ resource "azurerm_virtual_network" "vnet" {
   dynamic "ddos_protection_plan" {
     for_each = var.ddos_protection_plan
     content {
-      id      = ddos_protection_plan.value.id
+      id     = ddos_protection_plan.value.id
       enable = ddos_protection_plan.value.enable
     }
   }
 
-dynamic "encryption" {
+  dynamic "encryption" {
     for_each = var.encryption
     content {
       enforcement = encryption.value.enforcement

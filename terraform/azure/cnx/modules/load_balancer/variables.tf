@@ -100,29 +100,29 @@ variable "lb_probe" {
 
 
 
-variable floating_ip{
+variable "floating_ip" {
   description = "Boolean flag which gives the option to set the floating ip of load balancer rule"
   default     = false
 }
 
 variable "frontend_names" {
-  type    = list(string)
+  type = list(string)
 
 }
 
 variable "lb_name" {
   description = "Load balancer name"
   type        = string
-  }
+}
 
 variable "lb_availability_zone" {
   description = "availability zone"
   type        = string
   default     = ""
-  }
+}
 
 variable "frontend_ip" {
-  type    = list(string)
+  type = list(string)
 }
 
 variable "network_interface_ids" {
@@ -133,5 +133,5 @@ variable "network_interface_ip_configuration_names" {
   type = list(string)
 }
 variable "network_interface_ids_count" {
-   type = string
+  type = string
 }

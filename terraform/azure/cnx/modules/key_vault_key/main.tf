@@ -17,7 +17,7 @@ resource "azurerm_key_vault_key" "key_vault_key" {
     for_each = var.rotation_policy == null ? [] : [var.rotation_policy]
 
     content {
-      expire_after    = var.expire_after
+      expire_after = var.expire_after
       automatic {
         time_after_creation = var.time_after_creation
       }
@@ -33,5 +33,5 @@ resource "azurerm_key_vault_key" "key_vault_key" {
     ]
   }
 
-  tags         = var.tags
+  tags = var.tags
 }

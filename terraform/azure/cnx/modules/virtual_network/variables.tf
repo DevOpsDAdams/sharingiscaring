@@ -21,15 +21,15 @@ variable "address_space" {
 variable "ddos_protection_plan" {
   description = "A list of DDoS protection plan IDs to associate with the virtual network."
   type        = map(object)
-  default     = {
-    "id" = "<<ID>>"
+  default = {
+    "id"     = "<<ID>>"
     "enable" = true
   }
 }
 variable "encryption" {
   description = "A list of encryption service names to enable for the virtual network."
   type        = map(object)
-  default     = {
+  default = {
     "enforcement" = "DropUnencrypted"
   }
 }
