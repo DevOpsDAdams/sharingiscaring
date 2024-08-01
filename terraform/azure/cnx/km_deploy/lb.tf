@@ -1,30 +1,31 @@
-module "global_lb" {
-  source              = "../modules/load-balancer"
+module "load_balancers" {
+  source              = "../modules/load_balancer"
+  for_each            = var.json.networking_info.load_balancer
   location            = var.json.common_info.location
-  resource_group_name = azurerm_resource_group.resource_group.name
+  resource_group_name = module.resource_group.networking.name
 
-  type    = var.json.load_balancer.type
-  lb_sku  = var.json.load_balancer.sku
-  lb_name = "${var.json.load_balancer.prefix}-${lower(var.json.common_info.app_name_short)}-${var.json.common_info.env_short}-001"
+  type    = each.value.type
+  lb_sku  = each.value.sku
+  lb_name = "${each.value.name}-${var.json.common_info.env_short}-001"
 
-  lb_port = {frontend_1 = var.json.load_balancer.lb_port_frontend}
-  lb_probe = {Tcp = var.json.load_balancer.lb_probe_tcp}
+  lb_port = {frontend_1 = each.value.lb_port_frontend}
+  lb_probe = {Tcp = each.value.lb_probe_tcp}
 
   lb_probe_interval            = var.json.load_balancer.probe_interval
   lb_probe_unhealthy_threshold = var.json.load_balancer.probe_unhealthy_threshold
 
-  frontend_ip                            = var.json.load_balancer.frontend_ip
-  frontend_names                         = ["${var.json.load_balancer.frontend_prefix}-${var.json.common_info.app_name_short}-${upper(var.json.common_info.env_short)}-001"]
-  frontend_subnet_id                     = data.azurerm_subnet.lb.id
-  frontend_private_ip_address_allocation = var.json.load_balancer.ip_allocation
+  frontend_ip                            = each.value.frontend_ip
+  frontend_names                         = ["${each.value.frontend_prefix}-${upper(var.json.common_info.env_short)}"]
+  frontend_subnet_id                     = module.subnets.lb.id
+  frontend_private_ip_address_allocation = each.value.ip_allocation
 
-  network_interface_ids                    = data.azurerm_network_interface.nic.*.id
-  network_interface_ids_count              = length(data.azurerm_network_interface.nic.*.id)
-  network_interface_ip_configuration_names = flatten(data.azurerm_network_interface.nic[*].ip_configuration[*].name)
-  lb_availability_zone = var.json.load_balancer.zone
+  network_interface_ids                    = module.network_interface.nic.*.id
+  network_interface_ids_count              = length(module.network_interface.nic.*.id)
+  network_interface_ip_configuration_names = flatten(module.network_interface.nic[*].ip_configuration[*].name)
+  lb_availability_zone = each.value.zone
 
   tags = local.resource_tags
   depends_on = [
-    module.hyb_servers
+    module.subnets, module.network_interface
   ]
 }
