@@ -19,5 +19,5 @@ variable "tags" {
 
 variable "subnet_ids" {
   description = "The subnet ids to associate with the network security group."
-  type        = list(string)
+  type        = any
 }

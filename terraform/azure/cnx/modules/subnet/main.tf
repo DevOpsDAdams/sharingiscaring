@@ -5,11 +5,11 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = var.address_prefixes
   service_endpoints    = var.service_endpoints
   delegation {
-  name = var.delegation_name
+    name = var.delegation_name
 
-  service_delegation {
-    name    = var.delegation_service_name
-    actions = var.delegation_service_actions
+    service_delegation {
+      name    = var.delegation_service_name
+      actions = var.delegation_service_actions
+    }
   }
-}
 }

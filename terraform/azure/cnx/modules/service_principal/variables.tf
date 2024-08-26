@@ -30,5 +30,5 @@ variable "alternative_names" {
 
 variable "tags" {
   description = "The tags of the service principal"
-  type        = map(string)
+  type        = any
 }
