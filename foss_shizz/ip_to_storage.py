@@ -38,6 +38,7 @@ data=json.load(json_file)
 top=data['json']
 tags=top['tags']
 subscription=top['common_info']['deployment_subscription']
+infra_subscription=top['common_info']['infra_subscription']
 
 #############################################################################################################################################################################################################################################################################################################################
 
@@ -48,7 +49,6 @@ def add_remove_storage_accounts():
     count=0
     storage_names={}
     saf=False
-    os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(ip_address))
     sa_find=subprocess.Popen('az storage account list --resource-group ' + rg_name + ' --query "[].name" --output tsv 2>/dev/null', shell=True, stdout=subprocess.PIPE)
     for saf in sa_find.stdout:
         saf = saf.decode().rstrip()
@@ -61,5 +61,10 @@ def add_remove_storage_accounts():
         storage_name=json.dumps(storage_names)
         os.system("az storage account network-rule " + add_remove + " --resource-group " + rg_name + " --account-name " + saf + " --ip-address " + str(ip_address))
 
+
+
 add_remove_storage_accounts()
+os.system('az account set -s ' + infra_subscription) # Resetet the active subscription to Infrastructure Subscription
+os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(ip_address))
+
 json_file.close()
