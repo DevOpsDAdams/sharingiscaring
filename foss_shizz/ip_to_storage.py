@@ -43,6 +43,9 @@ infra_subscription=top['common_info']['infra_subscription']
 
 #############################################################################################################################################################################################################################################################################################################################
 
+os.system('az account set -s ' + infra_subscription) # Resetet the active subscription to Infrastructure Subscription
+os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(pub_auth_ip))
+
 os.system('az account set -s ' + subscription) # Set the active subscription
 
 def add_remove_storage_accounts():
@@ -65,7 +68,6 @@ def add_remove_storage_accounts():
 
 
 add_remove_storage_accounts()
-os.system('az account set -s ' + infra_subscription) # Resetet the active subscription to Infrastructure Subscription
-os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(pub_auth_ip))
+
 
 json_file.close()
