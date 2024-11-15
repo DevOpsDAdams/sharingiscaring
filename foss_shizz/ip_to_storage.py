@@ -21,6 +21,7 @@ add_remove=sys.argv[3]
 infra_resource_group_name=sys.argv[4]
 infra_storage_account_name=sys.argv[5]
 ip_address= subprocess.Popen("curl -s icanhazip.com", shell=True, stdout=subprocess.PIPE).stdout.read().decode().rstrip()
+pub_auth_ip="0.0.0.0/0" # Temporarily Authorizing all IPs to access the storage account. This will be changed to the IP of the machine running the script.
 
 #############################################################################################################################################################################################################################################################################################################################
 
@@ -65,6 +66,6 @@ def add_remove_storage_accounts():
 
 add_remove_storage_accounts()
 os.system('az account set -s ' + infra_subscription) # Resetet the active subscription to Infrastructure Subscription
-os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(ip_address))
+os.system("az storage account network-rule " + add_remove + " --resource-group " + infra_resource_group_name + " --account-name " + infra_storage_account_name + " --ip-address " + str(pub_auth_ip))
 
 json_file.close()
